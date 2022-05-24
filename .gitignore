@@ -7,3 +7,5 @@ reqlang
 *.dylib
 *.dll
 vls.log
+
+syntax-highlighting
