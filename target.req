@@ -1,0 +1,119 @@
+baseUrl = "https://uploadtarget.com";
+
+req example1(userAgent: string, body: json) {
+	// http info must be at top
+	POST https://example.com/postjson
+	headers: [
+		Content-Type: application/json
+		// Inject variables into headers with {}
+		User-Agent: {userAgent}
+	]
+	body
+	// or:
+	// body: body
+	// or:
+}
+
+req example2(query: string) {
+	PUT https://example.com/putjson?{query}
+	body: {
+		a: 'b'
+	}
+}
+
+req example3() {
+	PUT https://example.com/putform
+	body: form{
+		a: 'b'
+	}
+	// Sends "a=b"
+	// automatically sends Content-Type
+}
+
+struct ReturnType = {
+	a: string;
+	b: u32;
+	c: bytes;
+}
+
+req example4(query: query): ReturnType {
+	GET https://example.com/?{query}
+}
+
+// This will automatically upload to https://uploadtarget.com because of the baseUrl constant
+req exampleUploadFile(file: Stream) {
+	POST /upload
+	body: form{
+		file
+	}
+	// Automatically sends a multipart form
+}
+
+struct Message = {
+	type: "user",
+	data: {
+		user: u32
+	}
+} | {
+	type: "somethingelse",
+	something: string
+}
+
+// This will automatically upload to https://uploadtarget.com because of the baseUrl constant
+req connectToWebsocket() {
+	WS ws://echo.ws.com
+	reconnect: true
+	message: onMessage
+	open: example3 // make this http request when the websocket opens
+	close: () => {
+		// Inline function
+		println("ws closed");
+	}
+
+}
+
+
+fn onMessage(msg) {
+	msg.bytes;
+	msg.text;
+	let message = msg.json<Message>; // Validates that it matches the schema
+
+	match (message.type) {
+		"user" => println(message.data.user),
+		"somethingelse" => println(message.something)
+	}
+	// etc...
+}
+
+fn main() {
+	const res = example1("Some useragent", {
+		test: 'test'
+	});
+	println("status: {res.status}") // "status: 400"
+	let jsonResponse = res.json // automatically parses body as json and returns a rustlike Option if parse fails
+	let textResponse = res.text // or res.body -  returns utf8 decoded body
+	let streamResponse = res.stream
+	let bytesResponse = res.bytes // returns a byte array
+	let htmlResponse = res.html // parses html
+
+	const header = htmlResponse.$('h1').innerText;
+	println("Page header: {header}");
+
+	// Sends https://example.com/?a=b
+	example4({
+		a: b
+	});
+	let formValue = form{
+		a: 'b'
+	};
+	// Equivalent:
+	example4(formValue);
+
+	let c = 'abc'.b64;
+
+	println("{c} === \"YWJj\"")
+
+	// can also do .bytes, .stream, etc. to convert between types
+
+	// Control flow is the best parts of rust and js combined
+}

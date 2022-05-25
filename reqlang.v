@@ -9,14 +9,19 @@ import os
 
 fn main() {
 	mut app := cli.Command{
-		name: "reqlang"
-		description: "The reqlang interpreter written in V"
-		execute: fn (cmd cli.Command) ? {
-			mut file := cmd.args[0]
-			mut text := os.read_file(file) ?
-			parser.transpile(text)
+	name: "reqlang"
+	description: "The reqlang interpreter written in V"
+	execute: fn (cmd cli.Command) ? {
+		mut file := cmd.args[0] or {
+			println("No file specified")
+			exit(-1)
 		}
+		println("Compiling $file to V...")
+		mut text := os.read_file(file) ?
+		parser.transpile(text)
 	}
+}
 	app.setup()
 	app.parse(os.args)
+
 }
