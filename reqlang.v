@@ -1,11 +1,10 @@
 module main
 
-
-/* Using net.http for now, will write my own http client later */
-// import net.http
 import parser
 import cli 
 import os
+
+
 
 fn main() {
 	mut app := cli.Command{
@@ -18,10 +17,13 @@ fn main() {
 		}
 		println("Compiling $file to V...")
 		mut text := os.read_file(file) ?
-		parser.transpile(text)
+		mut transpiled := parser.transpile(text)
+		os.write_file("out.v", transpiled) or {
+			println("Failed to write file")
+			exit(-1)
+		}
 	}
 }
 	app.setup()
 	app.parse(os.args)
-
 }
